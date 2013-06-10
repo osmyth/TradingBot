@@ -1,7 +1,4 @@
-import com.lmax.api.Callback;
-import com.lmax.api.FailureResponse;
-import com.lmax.api.LmaxApi;
-import com.lmax.api.Session;
+import com.lmax.api.*;
 import com.lmax.api.account.LoginCallback;
 import com.lmax.api.account.LoginRequest;
 import com.lmax.api.account.LoginRequest.ProductType;
@@ -16,8 +13,22 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
     private final static long SPX500_INSTRUMENT_ID = 100093;
     private final static long EURUSD_INSTRUMENT_ID = 4001;
 
+    private FixedPointNumber currentValuationBidPrice;
+
+    public static void main(String[] args) {
+        MyTradingBot myTradingBot = new MyTradingBot();
+
+        LmaxApi lmaxApi = new LmaxApi("https://testapi.lmaxtrader.com");
+        lmaxApi.login(new LoginRequest("apetherapi", "testlmax1", ProductType.CFD_DEMO), myTradingBot);
+    }
+
     public void notify(OrderBookEvent orderBookEvent) {
-        System.out.printf("Market data: %s%n", orderBookEvent);
+
+        FixedPointNumber valuationBidPrice = orderBookEvent.getValuationBidPrice();
+        long timeStamp = orderBookEvent.getTimeStamp();
+
+        System.out.println("TimeStamp: "+timeStamp + ", valuationBidPrice: "+valuationBidPrice);
+        //System.out.println("Market data: "+ orderBookEvent);
     }
 
     public void onLoginSuccess(Session session) {
@@ -33,17 +44,9 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
         });
 
         session.start();
-
     }
 
     public void onLoginFailure(FailureResponse failureResponse) {
         System.err.printf("Failed to login, reason: %s%n", failureResponse);
-    }
-
-    public static void main(String[] args) {
-        MyTradingBot myTradingBot = new MyTradingBot();
-
-        LmaxApi lmaxApi = new LmaxApi("https://testapi.lmaxtrader.com");
-        lmaxApi.login(new LoginRequest("apetherapi", "testlmax1", ProductType.CFD_DEMO), myTradingBot);
     }
 }
