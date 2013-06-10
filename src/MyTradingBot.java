@@ -13,7 +13,9 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
     private final static long SPX500_INSTRUMENT_ID = 100093;
     private final static long EURUSD_INSTRUMENT_ID = 4001;
 
-    private FixedPointNumber currentValuationBidPrice;
+    private FixedPointNumber lastHourHighValuationBidPrice;
+    private FixedPointNumber lastHourLowValuationBidPrice;
+    private long lastValuationTimeStamp;
 
     public static void main(String[] args) {
         MyTradingBot myTradingBot = new MyTradingBot();
@@ -24,10 +26,36 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
 
     public void notify(OrderBookEvent orderBookEvent) {
 
-        FixedPointNumber valuationBidPrice = orderBookEvent.getValuationBidPrice();
-        long timeStamp = orderBookEvent.getTimeStamp();
+        // Read the valuationBidPrice and timeStamp
+        FixedPointNumber currentValuationBidPrice = orderBookEvent.getValuationBidPrice();
+        long currentTimeStamp = orderBookEvent.getTimeStamp();
 
-        System.out.println("TimeStamp: "+timeStamp + ", valuationBidPrice: "+valuationBidPrice);
+        // First time this is called both the high and low will be null so set the current bid to both
+        if(lastHourLowValuationBidPrice == null && lastHourHighValuationBidPrice == null) {
+            lastHourLowValuationBidPrice = currentValuationBidPrice;
+            lastHourHighValuationBidPrice = currentValuationBidPrice;
+            lastValuationTimeStamp = currentTimeStamp;
+        }
+
+        // if an hour has elapsed...
+        if(currentTimeStamp > (lastValuationTimeStamp + 3600000)) {
+
+            // if the current is lower than the last low, set current to last low
+            if(currentValuationBidPrice.longValue() < lastHourLowValuationBidPrice.longValue()) {
+                lastHourLowValuationBidPrice = currentValuationBidPrice;
+            }
+
+            // if the current is higher than the last high, set current to last high
+            if(currentValuationBidPrice.longValue() > lastHourHighValuationBidPrice.longValue()) {
+                lastHourHighValuationBidPrice = currentValuationBidPrice;
+            }
+
+            // reset the lastTimeStamp
+            lastValuationTimeStamp = currentTimeStamp;
+
+            System.out.println("TimeStamp: "+currentTimeStamp + ", valuationBidPrice: "+valuationBidPrice);
+        }
+
         //System.out.println("Market data: "+ orderBookEvent);
     }
 
