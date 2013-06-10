@@ -53,7 +53,7 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
             // reset the lastTimeStamp
             lastValuationTimeStamp = currentTimeStamp;
 
-            System.out.println("TimeStamp: "+currentTimeStamp + ", valuationBidPrice: "+valuationBidPrice);
+            //System.out.println("TimeStamp: "+currentTimeStamp + ", valuationBidPrice: "+valuationBidPrice);
         }
 
         //System.out.println("Market data: "+ orderBookEvent);
