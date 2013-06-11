@@ -6,8 +6,6 @@ import com.lmax.api.orderbook.OrderBookEvent;
 import com.lmax.api.orderbook.OrderBookEventListener;
 import com.lmax.api.orderbook.OrderBookSubscriptionRequest;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,46 +36,45 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
         FixedPointNumber currentValuationBidPrice = orderBookEvent.getValuationBidPrice();
         long currentTimeStamp = orderBookEvent.getTimeStamp();
 
-        long hourStartTime = currentTimeStamp-36000000;
+        long hourStartTime = currentTimeStamp - 36000000;
         long hourEndTime = currentTimeStamp;
 
         FixedPointNumber lastHourLowValuationBidPrice = getValuationBidPrice(hourStartTime, hourEndTime, false);
         FixedPointNumber lastHourHighValuationBidPrice = getValuationBidPrice(hourStartTime, hourEndTime, true);
 
-        if(lastHourLowValuationBidPrice != null || lastHourHighValuationBidPrice != null) {
+        if (lastHourLowValuationBidPrice != null || lastHourHighValuationBidPrice != null) {
 
-            System.out.println("Current Bid Price: "+currentValuationBidPrice+" Last Hour LOW: "+lastHourLowValuationBidPrice + ", HIGH: "+lastHourHighValuationBidPrice);
+            System.out.println("Current Bid Price: " + currentValuationBidPrice + " Last Hour LOW: " + lastHourLowValuationBidPrice + ", HIGH: " + lastHourHighValuationBidPrice);
 
             // if the current is lower than the last low, set current to last low
-            if(currentValuationBidPrice.longValue() < lastHourLowValuationBidPrice.longValue()) {
+            if (currentValuationBidPrice.longValue() < lastHourLowValuationBidPrice.longValue()) {
                 System.out.println("Execute Trade - Found new LOW for Last hour: " + currentValuationBidPrice);
             }
 
             // if the current is higher than the last high, set current to last high
-            if(currentValuationBidPrice.longValue() > lastHourHighValuationBidPrice.longValue()) {
+            if (currentValuationBidPrice.longValue() > lastHourHighValuationBidPrice.longValue()) {
                 System.out.println("Execute Trade - Found new HIGH for Last hour: " + currentValuationBidPrice);
             }
 
         }
 
-        //System.out.println("Adding: "+new Date(currentTimeStamp)+": "+currentValuationBidPrice);
         data.put(currentTimeStamp, currentValuationBidPrice);
     }
 
-    private FixedPointNumber getValuationBidPrice(long startTime, long endTime, boolean lastHigh) {
+    public FixedPointNumber getValuationBidPrice(long startTime, long endTime, boolean lastHigh) {
 
         FixedPointNumber lastHourValuationBidPrice = null;
 
-        for(Long key : data.keySet()) {
-            if(key < endTime && key >= startTime) {
+        for (Long key : data.keySet()) {
+            if (key < endTime && key >= startTime) {
                 FixedPointNumber value = data.get(key);
-                if(lastHourValuationBidPrice==null) {
+                if (lastHourValuationBidPrice == null) {
                     lastHourValuationBidPrice = value;
                 }
 
-                if(lastHigh && value.longValue() > lastHourValuationBidPrice.longValue()) {
+                if (lastHigh && value.longValue() > lastHourValuationBidPrice.longValue()) {
                     lastHourValuationBidPrice = value;
-                } else if(!lastHigh && value.longValue() < lastHourValuationBidPrice.longValue()) {
+                } else if (!lastHigh && value.longValue() < lastHourValuationBidPrice.longValue()) {
                     lastHourValuationBidPrice = value;
                 }
 
@@ -104,5 +101,13 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
 
     public void onLoginFailure(FailureResponse failureResponse) {
         System.err.printf("Failed to login, reason: %s%n", failureResponse);
+    }
+
+    public Map<Long, FixedPointNumber> getData() {
+        return data;
+    }
+
+    public void setData(Map<Long, FixedPointNumber> data) {
+        this.data = data;
     }
 }
