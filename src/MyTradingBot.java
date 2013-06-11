@@ -40,6 +40,7 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
             }
         });
 
+
         session.start();
 
     }
