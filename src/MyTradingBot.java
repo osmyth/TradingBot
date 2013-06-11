@@ -61,25 +61,26 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
     }
 
     public FixedPointNumber getValuationBidPrice(long startTime, long endTime, boolean lastHigh) {
+        FixedPointNumber lastHourValuationBidPrice = FixedPointNumber.valueOf(0);
 
-        FixedPointNumber lastHourValuationBidPrice = null;
-
+        // iterate over the keySet
         for (Long key : data.keySet()) {
+            // if the key (which is the time stamp) is between the startTime and endTime...
             if (key < endTime && key >= startTime) {
+                // extract the value for the key
                 FixedPointNumber value = data.get(key);
-                if (lastHourValuationBidPrice == null) {
-                    lastHourValuationBidPrice = value;
-                }
 
+                // if were looking for the last highest bid for the period, then check if the bid is greater than the current value
+                // else if were looking for the last lowest bid for the period, then check if the bid is lower than the current value
                 if (lastHigh && value.longValue() > lastHourValuationBidPrice.longValue()) {
                     lastHourValuationBidPrice = value;
                 } else if (!lastHigh && value.longValue() < lastHourValuationBidPrice.longValue()) {
                     lastHourValuationBidPrice = value;
                 }
-
             }
         }
 
+        // At this point we will either have the highest or lowest bid (depending on lastHigh boolean) over the period.
         return lastHourValuationBidPrice;
     }
 
