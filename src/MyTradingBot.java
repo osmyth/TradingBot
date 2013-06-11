@@ -23,6 +23,7 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
         lmaxApi.login(new LoginRequest("apetherapi", "testlmax1", ProductType.CFD_DEMO), myTradingBot);
     }
 
+
     public void notify(OrderBookEvent orderBookEvent) {
         System.out.printf("Market data: %s%n", orderBookEvent);
     }
