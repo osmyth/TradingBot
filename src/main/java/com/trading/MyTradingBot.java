@@ -96,7 +96,6 @@ public class MyTradingBot implements LoginCallback, OrderBookEventListener {
                 System.err.printf("Failed to subscribe: %s%n", failureResponse);
             }
         });
-
         session.start();
     }
 
